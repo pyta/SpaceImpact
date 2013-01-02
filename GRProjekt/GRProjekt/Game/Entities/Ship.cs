@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using GRProjekt.Game;
+using GRProjekt.Game.Entities;
 
 namespace GRProjekt.Ship
 {
@@ -19,16 +20,26 @@ namespace GRProjekt.Ship
         private  BoundingSphere SphereBoundingBuff;
         private Vector3 previousShipPosition;
 
+        public float    CurrentSpeed    { get; set; }
+        public int      MaxSpeed        { get; set; }
+        public float    CurrentFuel     { get; set; }
+        public int      MaxFuel         { get; set; }
+
+        public ShipPanel Panel { get; set; }
+
         #endregion
 
         #region Constructor
 
-        public  Ship()
+        public  Ship(int MaxSpeed, int MaxFuel)
             :base()
         {
             shipV = shipH = 0;
             this.objectSpherePosition = new Vector3(300.0f, 300.0f, 300.0f);
-            this.cameraTarget = new Vector3(1000, 0, 0); 
+            this.cameraTarget = new Vector3(1000, 0, 0);
+            this.CurrentSpeed = 0.0f;
+            this.MaxSpeed = MaxSpeed;
+            this.MaxFuel = MaxFuel;
         }
 
         #endregion
@@ -55,6 +66,8 @@ namespace GRProjekt.Ship
             this.objectSphereBounding.Radius -= 500;
             this.SphereBoundingBuff = this.objectSphereBounding;
             this.previousShipPosition = World.Current.shipPosition;
+
+            this.Panel = new ShipPanel(content.Load<Texture2D>("Graphics/Game/speed"), content.Load<Texture2D>("Graphics/Game/pointer"));
         }
 
         public override void Draw(GameTime gameTime)
@@ -73,6 +86,8 @@ namespace GRProjekt.Ship
                 }
                 mesh.Draw();
             }
+
+            
         }
 
         public override void Update()
@@ -80,13 +95,19 @@ namespace GRProjekt.Ship
             KeyboardState ks = Keyboard.GetState();
 
             if (ks.IsKeyDown(Keys.Left))
-                shipH += 1.0f;
+                shipH += 0.5f;
             if (ks.IsKeyDown(Keys.Right))
-                shipH -= 1.0f;
+                shipH -= 0.5f;
             if (ks.IsKeyDown(Keys.Down) && shipV < 20)
-                shipV += 1.0f;
+                shipV += 0.5f;
             if (ks.IsKeyDown(Keys.Up) && shipV > -20)
-                shipV -= 1.0f;
+                shipV -= 0.5f;
+
+            if (ks.IsKeyDown(Keys.Space))
+            {
+                if (this.CurrentSpeed > 0)
+                    this.CurrentSpeed -= 1;
+            }
 
             this.previousShipPosition = World.Current.shipPosition;
 
@@ -94,7 +115,7 @@ namespace GRProjekt.Ship
             shipOrientation *= Matrix.CreateFromAxisAngle(shipOrientation.Left, MathHelper.ToRadians(shipV));
 
             World.Current.shipPosition = new Vector3(World.Current.shipPosition.X, World.Current.shipPosition.Y, World.Current.shipPosition.Z);
-            World.Current.shipPosition += shipOrientation.Forward * 100.0f;
+            World.Current.shipPosition += shipOrientation.Forward * this.CurrentSpeed;
 
             this.objectSphereBounding = this.SphereBoundingBuff.Transform(shipOrientation * Matrix.CreateTranslation(World.Current.shipPosition));
 
@@ -116,6 +137,14 @@ namespace GRProjekt.Ship
             {
                 shipH = 100;
             }
+
+            if (this.CurrentSpeed < (this.MaxSpeed / 2))
+                this.CurrentSpeed += 0.5f;
+        }
+
+        public void DrawPanel(SpriteBatch spriteBatch, Rectangle bounds)
+        {
+            this.Panel.Draw(spriteBatch, bounds, this.CurrentSpeed);
         }
 
         #endregion

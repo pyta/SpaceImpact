@@ -32,7 +32,7 @@ namespace GRProjekt.Game
         {
             this.game = game;
             this.playing = false;
-            this.ship = new Ship.Ship();
+            this.ship = new Ship.Ship(300, 100);
             this.planets = new Planets();
 
             this.world = new World(this.game.GraphicsDevice.Viewport.AspectRatio);
@@ -127,7 +127,8 @@ namespace GRProjekt.Game
                 foreach (var planet in this.planets) planet.Draw(gameTime);
                 ship.Draw(gameTime);
 
-
+                Rectangle speedometer = new Rectangle(20, 450, 100, 100);
+                ship.DrawPanel(spriteBatch, speedometer);
             }
             base.Draw(gameTime);
         }
