@@ -9,10 +9,18 @@ using Microsoft.Xna.Framework.Input;
 
 namespace GRProjekt.Game
 {
+    public enum MenuList
+    {
+        game,
+        planetMenu
+    }
+
     public class NewGame : Microsoft.Xna.Framework.DrawableGameComponent
     {
         #region Members
 
+        private Texture2D planetMenuTexture;
+        private MenuList currentItem;
         private Microsoft.Xna.Framework.Game game;
         private bool playing;
         private Texture2D gameTexture;
@@ -32,12 +40,14 @@ namespace GRProjekt.Game
         {
             this.game = game;
             this.playing = false;
-            this.ship = new Ship.Ship(300, 100);
+            this.ship = new Ship.Ship();
             this.planets = new Planets();
 
             this.world = new World(this.game.GraphicsDevice.Viewport.AspectRatio);
             this.network = new Network();
             this.time = 0.0f;
+
+            this.currentItem = MenuList.game;
         }
 
         #endregion
@@ -64,6 +74,7 @@ namespace GRProjekt.Game
         {
             base.LoadContent();
             this.gameTexture = game.Content.Load<Texture2D>("Graphics/Game/space");
+            this.planetMenuTexture = game.Content.Load<Texture2D>("Graphics/MainMenu/authorBackground");
             this.ship.LoadContent(game.Content);
             this.network.LoadContent(game.Content);
 
@@ -85,25 +96,64 @@ namespace GRProjekt.Game
                 this.ship.Update();
                 foreach (var planet in this.planets) planet.Update();
                 this.time += 0.01f;
-
+                
                 // kolizje z planetami 
                 for (int i = 0; i < this.planets.Count; ++i)
                 {
-                    if (this.ship.ObjectSphereBounding.Intersects(planets[i].ObjectSphereBounding) && planets[i].GetPlanetType == PlanetType.Star)
-                    {
+                    planets[i].UpdatePosition();
 
-                    }
-                    else if (this.ship.ObjectSphereBounding.Intersects(planets[i].ObjectSphereBounding) && planets[i].GetPlanetType == PlanetType.RingPlanet)
+                    if (this.ship.ObjectSphereBounding.Intersects(planets[i].ObjectSphereBounding))
                     {
+                        planets[i].Dock();
                     }
-                    else if (this.ship.ObjectSphereBounding.Intersects(planets[i].ObjectSphereBounding) && planets[i].GetPlanetType == PlanetType.GasPlanet)
+
+                    if (planets[i].IsDocked())
                     {
+                        World.Current.shipPosition = planets[i].GetPlanetPositon();
+                        World.Current.cameraPosition = planets[i].GetPlanetPositon() - new Vector3(100, -600, 0);
+                        currentItem = MenuList.planetMenu;
+                        ship.PlanetCollision();
                     }
-                    else if (this.ship.ObjectSphereBounding.Intersects(planets[i].ObjectSphereBounding) && planets[i].GetPlanetType == PlanetType.LavaPlanet)
+
+                    //if (this.ship.ObjectSphereBounding.Intersects(planets[i].ObjectSphereBounding) && planets[i].GetPlanetType == PlanetType.Star)
+                    //{
+                    //    World.Current.shipPosition = planets[i].GetPlanetPositon();
+                    //    ship.PlanetCollision();                        
+                    //}
+                    //else if (this.ship.ObjectSphereBounding.Intersects(planets[i].ObjectSphereBounding) && planets[i].GetPlanetType == PlanetType.RingPlanet)
+                    //{
+                    //    World.Current.shipPosition = planets[i].GetPlanetPositon();
+                    //    ship.PlanetCollision();
+                    //}
+                    //else if (this.ship.ObjectSphereBounding.Intersects(planets[i].ObjectSphereBounding) && planets[i].GetPlanetType == PlanetType.GasPlanet)
+                    //{
+                    //    World.Current.shipPosition = planets[i].GetPlanetPositon();
+                    //    ship.PlanetCollision();
+                    //}
+                    //else if (this.ship.ObjectSphereBounding.Intersects(planets[i].ObjectSphereBounding) && planets[i].GetPlanetType == PlanetType.LavaPlanet)
+                    //{
+                    //    World.Current.shipPosition = planets[i].GetPlanetPositon();
+                    //    ship.PlanetCollision();
+                    //}
+                    //else if (planets[i].ObjectSphereBounding.Intersects(this.ship.ObjectSphereBounding))
+                    //{
+                    //    World.Current.shipPosition = planets[i].GetPlanetPositon();
+                    //    ship.PlanetCollision();
+                    //}
+
+                    if (Keyboard.GetState().IsKeyDown(Keys.Space))
                     {
-                    }
-                    else if (planets[i].ObjectSphereBounding.Intersects(this.ship.ObjectSphereBounding))
-                    {
+                        for (int j = 0; j < this.planets.Count; ++j)
+                        {
+                            if (planets[i].IsDocked())
+                            {
+                                planets[j].UnDock();
+                                //World.Current.shipPosition += new Vector3(100, 500, 1100);
+                                currentItem = MenuList.game;
+                                World.Current.shipPosition += new Vector3(0,700,0);
+                                ship.ShipStart();
+                            }
+                        }
                     }
                 }
             }
@@ -127,8 +177,13 @@ namespace GRProjekt.Game
                 foreach (var planet in this.planets) planet.Draw(gameTime);
                 ship.Draw(gameTime);
 
-                Rectangle speedometer = new Rectangle(20, 450, 100, 100);
-                ship.DrawPanel(spriteBatch, speedometer);
+                if (currentItem == MenuList.planetMenu)
+                {
+                    spriteBatch.Begin();
+                    spriteBatch.Draw(planetMenuTexture, new Vector2(200, 110), Color.White);
+                    spriteBatch.End();
+                }
+
             }
             base.Draw(gameTime);
         }

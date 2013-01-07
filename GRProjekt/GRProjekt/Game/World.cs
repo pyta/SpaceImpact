@@ -28,7 +28,7 @@ namespace GRProjekt.Game
             if (current == null)
             {
                 this.cameraPosition = new Vector3(1000, 100.0f, 0);
-                this.shipPosition = new Vector3(100.0f, 100.0f, 0.0f);
+                this.shipPosition = new Vector3(-100.0f,200.0f, -10000.0f);
                 this.projectionMatrix = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(75.0f), aspectRatio, 1.0f, 1000000.0f);
             }
             current = this;

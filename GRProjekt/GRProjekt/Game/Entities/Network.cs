@@ -19,7 +19,7 @@ namespace GRProjekt.Game.Entities
 
         public sealed override void LoadContent(Microsoft.Xna.Framework.Content.ContentManager content)
         {
-            networkVisible = false;
+            networkVisible = true;
             this.objectModel = content.Load<Model>("Ground");
             this.objectBoneTransforms = new Matrix[objectModel.Bones.Count];
         }
