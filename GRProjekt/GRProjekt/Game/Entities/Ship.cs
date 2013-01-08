@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using GRProjekt.Game;
+using GRProjekt.Game.Entities;
 
 namespace GRProjekt.Ship
 {
@@ -18,10 +19,61 @@ namespace GRProjekt.Ship
         private float shipV, shipH;
         private  BoundingSphere SphereBoundingBuff;
         private Vector3 previousShipPosition;
-        public float speed = 1;
+
+        /// <summary>
+        /// Aktualna prędkość
+        /// </summary>
+        private float _speed = 1;
+        public float Speed
+        {
+            get { return this._speed; }
+            set { this._speed = value; }
+        }
+
+        /// <summary>
+        /// Przyśpieszenie
+        /// </summary>
+        private float _speeding = 0.5f;
+        public float Speeding
+        {
+            get { return this._speeding; }
+            set { this._speeding = value; }
+        }
+
+        /// <summary>
+        /// Aktualny stan paliwa
+        /// </summary>
+        private float _fuel = 70.0f;
+        public float Fuel
+        {
+            get { return this._fuel; }
+            set { this._fuel = value; }
+        }
+
+        /// <summary>
+        /// Spalanie statku
+        /// </summary>
+        private float _combustion = 0.02f;
+        public float Combustion
+        {
+            get { return this._combustion; }
+            set { this._combustion = value; }
+        }
+
+        /// <summary>
+        /// Maksymalna prędkość 0 - 225 (Wartość wynikająca z kąta)
+        /// </summary>
+        private float _maxSpeed = 150.0f;
+        public float MaxSpeed
+        {
+            get { return this._maxSpeed; }
+            set { this._maxSpeed = value; }
+        }
+
+        // Wartości stałe wynikające z kąta pomiędzy mminimalym, a maksymanlnym wychyleniem wskazówki licznika
+        private const float _maxFuel = 70;      // Wartość zawsze stała - zmiany tylko spalaniem
 
         #endregion
-
 
         #region Constructor
 
@@ -30,7 +82,7 @@ namespace GRProjekt.Ship
         {
             shipV = shipH = 0;
             this.objectSpherePosition = new Vector3(300.0f, 300.0f, 300.0f);
-            this.cameraTarget = new Vector3(1000, 0, 0); 
+            this.cameraTarget = new Vector3(1000, 0, 0);
         }
 
         #endregion
@@ -39,14 +91,14 @@ namespace GRProjekt.Ship
         
         public void PlanetCollision()
         {
-            speed = 0;
+            this._speed = 0;
             shipV = 0;
             shipH = 0;
         }
 
         public void ShipStart()
         {
-            speed = 1;
+            this._speed = 1;
             shipV = 0;
             shipH = 80;
         }
@@ -59,7 +111,7 @@ namespace GRProjekt.Ship
             shipOrientation *= Matrix.CreateFromAxisAngle(shipOrientation.Left, MathHelper.ToRadians(shipV));
 
             World.Current.shipPosition = new Vector3(World.Current.shipPosition.X, World.Current.shipPosition.Y, World.Current.shipPosition.Z);
-            World.Current.shipPosition += shipOrientation.Forward * speed;
+            World.Current.shipPosition += shipOrientation.Forward * this._speed;
 
             objectBoneTransforms = new Matrix[objectModel.Bones.Count];
 
@@ -93,41 +145,55 @@ namespace GRProjekt.Ship
 
         private void DecrementSpeed()
         {
-            if (speed > 50)
+            if (this._speed > 50)
             {
-                speed -= 0.6f;
+                this._speed -= this._speeding;
             }
         }
 
         public override void Update()
         {
-
-
             KeyboardState ks = Keyboard.GetState();
 
             if (ks.IsKeyDown(Keys.Left))
             {
-                shipH += 1.2f;
-                DecrementSpeed();
+                shipH += 0.6f;
+                //DecrementSpeed();
             }
             if (ks.IsKeyDown(Keys.Right))
             {
-                shipH -= 1.2f;
-                DecrementSpeed();
+                shipH -= 0.6f;
+                //DecrementSpeed();
             }
-            if (ks.IsKeyDown(Keys.Up) && shipV < 40)
+            if (ks.IsKeyDown(Keys.Up) && shipV > -40)
             {
-                shipV += 1.2f;
-                DecrementSpeed();
+                shipV -= 0.6f;
+                //DecrementSpeed();
             }
-            if (ks.IsKeyDown(Keys.Down) && shipV > -40)
+            if (ks.IsKeyDown(Keys.Down) && shipV < 40)
             {
-                shipV -= 1.2f;
-                DecrementSpeed();
+                shipV += 0.6f;
+                //DecrementSpeed();
             }
-            else if (speed > 0 && speed <= 200)
+            // Zmiana prędkości i paliwa
+            if (this._speed > 0)
             {
-                speed++;
+                // Jeśli paliwo jest w bezpiecznym stanie to prędkość rośnie normalnie do maksymalnej dostępnej
+                if (this._fuel > 0)
+                {
+                    if (this._speed < _maxSpeed)
+                        this._speed += this._speeding;
+                }
+                // Jeśli nie prędkość to zaczyna spadać do 0
+                else
+                {
+                    // if(this._fuel > 0)
+                        this._speed -= this._speeding;
+                }
+
+                // Spalanie
+                if (this._fuel > 0)
+                    this._fuel -= this._combustion;
             }
 
             this.previousShipPosition = World.Current.shipPosition;
@@ -136,7 +202,7 @@ namespace GRProjekt.Ship
             shipOrientation *= Matrix.CreateFromAxisAngle(shipOrientation.Left, MathHelper.ToRadians(shipV));
 
             World.Current.shipPosition = new Vector3(World.Current.shipPosition.X, World.Current.shipPosition.Y, World.Current.shipPosition.Z);
-            World.Current.shipPosition += shipOrientation.Forward * speed;
+            World.Current.shipPosition += shipOrientation.Forward * this._speed;
 
             this.objectSphereBounding = this.SphereBoundingBuff.Transform(shipOrientation * Matrix.CreateTranslation(World.Current.shipPosition));
 

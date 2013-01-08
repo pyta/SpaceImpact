@@ -15,6 +15,8 @@ Content\Models\Planets\RingPlanet2\Planet Rings.xnb
 Content\Models\Planets\RingPlanet\saturnmap.xnb
 Content\Models\Planets\Star\suncyl1.xnb
 Content\Models\Planets\GasPlanet\Gas Gaint Texture copy.xnb
+Content\Graphics\Game\pointer.xnb
+Content\Graphics\Game\speed.xnb
 Content\Models\Ship\guard3.xnb
 Content\Ground.xnb
 Content\Models\Planets\RingPlanet\ring.xnb
@@ -29,3 +31,5 @@ Content\Models\Planets\RingPlanet2\Planet Rings_0.xnb
 Content\Models\Planets\Star\suncyl1_0.xnb
 Content\Models\Planets\GasPlanet\Gas Gaint Texture copy_0.xnb
 Content\Models\Ship\ShipDiffuse_0.xnb
+Content\Graphics\Game\fuel.xnb
+Content\Graphics\Game\fulePointer.xnb

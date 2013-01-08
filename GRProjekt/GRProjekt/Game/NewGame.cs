@@ -31,6 +31,8 @@ namespace GRProjekt.Game
         private Network network;
         private float time;
 
+        public ShipPanel Panel { get; set; }
+
         #endregion
 
         #region Constructor
@@ -76,6 +78,11 @@ namespace GRProjekt.Game
             this.gameTexture = game.Content.Load<Texture2D>("Graphics/Game/space");
             this.planetMenuTexture = game.Content.Load<Texture2D>("Graphics/MainMenu/authorBackground");
             this.ship.LoadContent(game.Content);
+            this.Panel = new ShipPanel(
+                game.Content.Load<Texture2D>("Graphics/Game/speed"), 
+                game.Content.Load<Texture2D>("Graphics/Game/pointer"),
+                game.Content.Load<Texture2D>("Graphics/Game/fuel"),
+                game.Content.Load<Texture2D>("Graphics/Game/fulePointer"));
             this.network.LoadContent(game.Content);
 
             foreach(var planet in this.planets)  planet.LoadContent(game.Content);
@@ -167,6 +174,7 @@ namespace GRProjekt.Game
 
                 spriteBatch.Begin();
                 spriteBatch.Draw(gameTexture, this.game.GraphicsDevice.Viewport.Bounds, Color.White);
+                this.Panel.Draw(spriteBatch, new Rectangle(50, 475, 100, 100), ship.Speed, new Rectangle(650, 475, 100, 100), ship.Fuel);
                 spriteBatch.End();
 
                 GraphicsDevice.BlendState = BlendState.Opaque;
