@@ -13,10 +13,10 @@ namespace GRProjekt.Game.Entities
     public class ShipPanel
     {
         #region Members
-        public Texture2D SpeedometerBackground  {get; set;}
-        public Texture2D SpeedometerPointer     {get; set;}
-        public Texture2D FuelBackground { get; set; }
-        public Texture2D FuelPointer { get; set; }
+        public Texture2D SpeedometerBackground  { get; set; }
+        public Texture2D SpeedometerPointer     { get; set; }
+        public Texture2D FuelBackground         { get; set; }
+        public Texture2D FuelPointer            { get; set; }
         #endregion
 
         #region Constructors

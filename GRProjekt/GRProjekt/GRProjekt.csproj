@@ -113,7 +113,9 @@
     <Compile Include="Game\Entities\Network.cs" />
     <Compile Include="Game\Entities\Object.cs" />
     <Compile Include="Game\Entities\Planet.cs" />
+    <Compile Include="Game\Entities\RunOutFuelWindow.cs" />
     <Compile Include="Game\Entities\ShipPanel.cs" />
+    <Compile Include="Game\Entities\Stars.cs" />
     <Compile Include="Game\NewGame.cs" />
     <Compile Include="Game\World.cs" />
     <Compile Include="MainMenu\ManuItem.cs" />

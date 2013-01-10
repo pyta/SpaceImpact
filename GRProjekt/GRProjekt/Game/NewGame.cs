@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using GRProjekt.Game.Entities;
+using GRProjekt.Exceptions;
 using Microsoft.Xna.Framework.Input;
 
 namespace GRProjekt.Game
@@ -12,7 +13,8 @@ namespace GRProjekt.Game
     public enum MenuList
     {
         game,
-        planetMenu
+        planetMenu,
+        runOutFuel
     }
 
     public class NewGame : Microsoft.Xna.Framework.DrawableGameComponent
@@ -31,7 +33,19 @@ namespace GRProjekt.Game
         private Network network;
         private float time;
 
+        /// <summary>
+        /// Informacja o tym czy statek jest zadokowany przy jakiejś planecie
+        /// </summary>
+        private bool _isDocked = false;
+        public bool IsDocked
+        {
+            get { return this._isDocked; }
+            set { this._isDocked = value; }
+        }
+
         public ShipPanel Panel { get; set; }
+        public RunOutFuelWindow RunOutFuelWindow { get; set; }
+        public Stars Stars { get; set; }
 
         #endregion
 
@@ -78,11 +92,24 @@ namespace GRProjekt.Game
             this.gameTexture = game.Content.Load<Texture2D>("Graphics/Game/space");
             this.planetMenuTexture = game.Content.Load<Texture2D>("Graphics/MainMenu/authorBackground");
             this.ship.LoadContent(game.Content);
+            // Panel (liczniki + inne pierdoły)
             this.Panel = new ShipPanel(
                 game.Content.Load<Texture2D>("Graphics/Game/speed"), 
                 game.Content.Load<Texture2D>("Graphics/Game/pointer"),
                 game.Content.Load<Texture2D>("Graphics/Game/fuel"),
                 game.Content.Load<Texture2D>("Graphics/Game/fulePointer"));
+            // Okienko informujące o braku tanku
+            this.RunOutFuelWindow = new RunOutFuelWindow(
+                 game.Content.Load<Texture2D>("Graphics/Game/runOutFuel"),
+                 new Rectangle((this.GraphicsDevice.Viewport.Width - 486) / 2, (this.GraphicsDevice.Viewport.Height - 358) / 2, 486, 358),
+                 game.Content.Load<Texture2D>("Graphics/Game/okBut"),
+                 new Rectangle(((this.GraphicsDevice.Viewport.Width - 486) / 2) + 275, ((this.GraphicsDevice.Viewport.Height - 358) / 2) + 250, 150, 75));
+            // Gwiazdki
+            this.Stars = new Stars(
+                game.Content.Load<Texture2D>("Graphics/Game/star"),
+                this.GraphicsDevice.Viewport.Width,
+                this.GraphicsDevice.Viewport.Height);
+
             this.network.LoadContent(game.Content);
 
             foreach(var planet in this.planets)  planet.LoadContent(game.Content);
@@ -98,11 +125,27 @@ namespace GRProjekt.Game
                 {
                     this.network.NetworkVisible = !this.network.NetworkVisible;
                 }
-                if (this.time > 0.06f) time = 0; 
+                if (this.time > 0.06f) time = 0;
 
-                this.ship.Update();
+                #region Zachowania statku
+                try
+                {
+                    this.ship.Update();
+                }
+                catch (RunOutFuelException)
+                {
+                    this.currentItem = MenuList.runOutFuel;
+                }
+                catch (Exception)
+                { 
+                    // BUG
+                }
+                #endregion
+
                 foreach (var planet in this.planets) planet.Update();
                 this.time += 0.01f;
+
+                this.Stars.Update(this.ship.Speed);
                 
                 // kolizje z planetami 
                 for (int i = 0; i < this.planets.Count; ++i)
@@ -112,6 +155,7 @@ namespace GRProjekt.Game
                     if (this.ship.ObjectSphereBounding.Intersects(planets[i].ObjectSphereBounding))
                     {
                         planets[i].Dock();
+                        this._isDocked = true;
                     }
 
                     if (planets[i].IsDocked())
@@ -122,6 +166,7 @@ namespace GRProjekt.Game
                         ship.PlanetCollision();
                     }
 
+                    #region Stary kod
                     //if (this.ship.ObjectSphereBounding.Intersects(planets[i].ObjectSphereBounding) && planets[i].GetPlanetType == PlanetType.Star)
                     //{
                     //    World.Current.shipPosition = planets[i].GetPlanetPositon();
@@ -147,6 +192,7 @@ namespace GRProjekt.Game
                     //    World.Current.shipPosition = planets[i].GetPlanetPositon();
                     //    ship.PlanetCollision();
                     //}
+                    #endregion
 
                     if (Keyboard.GetState().IsKeyDown(Keys.Space))
                     {
@@ -159,9 +205,22 @@ namespace GRProjekt.Game
                                 currentItem = MenuList.game;
                                 World.Current.shipPosition += new Vector3(0,700,0);
                                 ship.ShipStart();
+                                this._isDocked = false;
                             }
                         }
                     }
+                }
+
+                switch (this.currentItem)
+                { 
+                    case MenuList.runOutFuel:
+                        if (this.RunOutFuelWindow.Update())
+                        { 
+                            // naciśnięto na przycisk
+                            this._isDocked = true;
+                            planets[1].Dock();
+                        }
+                    break;
                 }
             }
         }
@@ -174,7 +233,6 @@ namespace GRProjekt.Game
 
                 spriteBatch.Begin();
                 spriteBatch.Draw(gameTexture, this.game.GraphicsDevice.Viewport.Bounds, Color.White);
-                this.Panel.Draw(spriteBatch, new Rectangle(50, 475, 100, 100), ship.Speed, new Rectangle(650, 475, 100, 100), ship.Fuel);
                 spriteBatch.End();
 
                 GraphicsDevice.BlendState = BlendState.Opaque;
@@ -185,10 +243,24 @@ namespace GRProjekt.Game
                 foreach (var planet in this.planets) planet.Draw(gameTime);
                 ship.Draw(gameTime);
 
-                if (currentItem == MenuList.planetMenu)
+                switch (this.currentItem)
+                { 
+                    case MenuList.planetMenu:
+                        spriteBatch.Begin();
+                        spriteBatch.Draw(planetMenuTexture, new Vector2(200, 110), Color.White);
+                        spriteBatch.End();
+                    break;
+                    case MenuList.runOutFuel:
+                        this.RunOutFuelWindow.Draw(spriteBatch);
+                    break;
+                }
+
+                if (!this._isDocked)
                 {
+                    // Rysowanie panelu
                     spriteBatch.Begin();
-                    spriteBatch.Draw(planetMenuTexture, new Vector2(200, 110), Color.White);
+                    this.Panel.Draw(spriteBatch, new Rectangle(50, 475, 100, 100), ship.Speed, new Rectangle(650, 475, 100, 100), ship.Fuel);
+                    this.Stars.Draw(spriteBatch);
                     spriteBatch.End();
                 }
 

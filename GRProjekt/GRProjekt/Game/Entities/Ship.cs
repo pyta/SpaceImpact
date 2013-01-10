@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using GRProjekt.Game;
 using GRProjekt.Game.Entities;
+using GRProjekt.Exceptions; 
 
 namespace GRProjekt.Ship
 {
@@ -15,10 +16,10 @@ namespace GRProjekt.Ship
     {
         #region Members
 
-        private Matrix shipOrientation;
-        private float shipV, shipH;
-        private  BoundingSphere SphereBoundingBuff;
-        private Vector3 previousShipPosition;
+        private Matrix          shipOrientation;
+        private float           shipV, shipH;
+        private BoundingSphere  SphereBoundingBuff;
+        private Vector3         previousShipPosition;
 
         /// <summary>
         /// Aktualna prędkość
@@ -154,28 +155,19 @@ namespace GRProjekt.Ship
         public override void Update()
         {
             KeyboardState ks = Keyboard.GetState();
-
-            if (ks.IsKeyDown(Keys.Left))
+            // Zmiana kierunku możliwa tylko jeśli jest statek w ruchu 
+            if (this._speed > 0)
             {
-                shipH += 0.6f;
-                //DecrementSpeed();
+                if (ks.IsKeyDown(Keys.Left))
+                    shipH += 0.2f;
+                if (ks.IsKeyDown(Keys.Right))
+                    shipH -= 0.2f;
+                if (ks.IsKeyDown(Keys.Up) && shipV > -40)
+                    shipV -= 0.2f;
+                if (ks.IsKeyDown(Keys.Down) && shipV < 40)
+                    shipV += 0.2f;
             }
-            if (ks.IsKeyDown(Keys.Right))
-            {
-                shipH -= 0.6f;
-                //DecrementSpeed();
-            }
-            if (ks.IsKeyDown(Keys.Up) && shipV > -40)
-            {
-                shipV -= 0.6f;
-                //DecrementSpeed();
-            }
-            if (ks.IsKeyDown(Keys.Down) && shipV < 40)
-            {
-                shipV += 0.6f;
-                //DecrementSpeed();
-            }
-            // Zmiana prędkości i paliwa
+            // Zmiana prędkości i stanu paliwa
             if (this._speed > 0)
             {
                 // Jeśli paliwo jest w bezpiecznym stanie to prędkość rośnie normalnie do maksymalnej dostępnej
@@ -187,14 +179,16 @@ namespace GRProjekt.Ship
                 // Jeśli nie prędkość to zaczyna spadać do 0
                 else
                 {
-                    // if(this._fuel > 0)
-                        this._speed -= this._speeding;
+                    this._speed -= this._speeding;
                 }
 
                 // Spalanie
                 if (this._fuel > 0)
                     this._fuel -= this._combustion;
             }
+            // Wyjątek spowodowany wyczerpaniem się paliwa
+            if (this._speed <= 0 && this._fuel <= 0)
+                throw new RunOutFuelException();
 
             this.previousShipPosition = World.Current.shipPosition;
 

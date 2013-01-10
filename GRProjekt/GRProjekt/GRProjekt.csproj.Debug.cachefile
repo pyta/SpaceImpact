@@ -33,3 +33,7 @@ Content\Models\Planets\GasPlanet\Gas Gaint Texture copy_0.xnb
 Content\Models\Ship\ShipDiffuse_0.xnb
 Content\Graphics\Game\fuel.xnb
 Content\Graphics\Game\fulePointer.xnb
+Content\Graphics\Game\runOutFuel.xnb
+Content\Graphics\Game\27.xnb
+Content\Graphics\Game\star.xnb
+Content\Graphics\Game\okBut.xnb
