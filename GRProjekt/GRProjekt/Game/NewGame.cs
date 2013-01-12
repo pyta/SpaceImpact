@@ -45,7 +45,7 @@ namespace GRProjekt.Game
 
         public ShipPanel Panel { get; set; }
         public RunOutFuelWindow RunOutFuelWindow { get; set; }
-        public Stars Stars { get; set; }
+        //public Stars Stars { get; set; }
 
         #endregion
 
@@ -104,7 +104,11 @@ namespace GRProjekt.Game
                  new Rectangle((this.GraphicsDevice.Viewport.Width - 486) / 2, (this.GraphicsDevice.Viewport.Height - 358) / 2, 486, 358),
                  game.Content.Load<Texture2D>("Graphics/Game/okBut"),
                  new Rectangle(((this.GraphicsDevice.Viewport.Width - 486) / 2) + 275, ((this.GraphicsDevice.Viewport.Height - 358) / 2) + 250, 150, 75));
-
+            // Gwiazdki
+            //this.Stars = new Stars(
+            //    game.Content.Load<Texture2D>("Graphics/Game/star"),
+            //    this.GraphicsDevice.Viewport.Width,
+            //    this.GraphicsDevice.Viewport.Height);
             this.network.LoadContent(game.Content);
 
             foreach(var planet in this.planets)  planet.LoadContent(game.Content);
@@ -139,6 +143,8 @@ namespace GRProjekt.Game
 
                 foreach (var planet in this.planets) planet.Update();
                 this.time += 0.01f;
+
+                //this.Stars.Update(this.ship.Speed);
                 
                 // kolizje z planetami 
                 for (int i = 0; i < this.planets.Count; ++i)
@@ -252,10 +258,10 @@ namespace GRProjekt.Game
                 {
                     // Rysowanie panelu
                     spriteBatch.Begin();
+                    //this.Stars.Draw(spriteBatch);
                     this.Panel.Draw(spriteBatch, new Rectangle(50, 475, 100, 100), ship.Speed, new Rectangle(650, 475, 100, 100), ship.Fuel);
                     spriteBatch.End();
                 }
-
             }
             base.Draw(gameTime);
         }
