@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework;
 using GRProjekt.Game.Entities;
 using GRProjekt.Exceptions;
 using Microsoft.Xna.Framework.Input;
+using GRProjekt.MainMenu;
 
 namespace GRProjekt.Game
 {
@@ -32,7 +33,8 @@ namespace GRProjekt.Game
         private World world;
         private Network network;
         private float time;
-
+        private ExitMenu.ExitMenu exitMenu;
+ 
         /// <summary>
         /// Informacja o tym czy statek jest zadokowany przy jakiejś planecie
         /// </summary>
@@ -45,7 +47,7 @@ namespace GRProjekt.Game
 
         public ShipPanel Panel { get; set; }
         public RunOutFuelWindow RunOutFuelWindow { get; set; }
-        //public Stars Stars { get; set; }
+
 
         #endregion
 
@@ -64,6 +66,7 @@ namespace GRProjekt.Game
             this.time = 0.0f;
 
             this.currentItem = MenuList.game;
+            this.exitMenu = new ExitMenu.ExitMenu();
         }
 
         #endregion
@@ -104,12 +107,9 @@ namespace GRProjekt.Game
                  new Rectangle((this.GraphicsDevice.Viewport.Width - 486) / 2, (this.GraphicsDevice.Viewport.Height - 358) / 2, 486, 358),
                  game.Content.Load<Texture2D>("Graphics/Game/okBut"),
                  new Rectangle(((this.GraphicsDevice.Viewport.Width - 486) / 2) + 275, ((this.GraphicsDevice.Viewport.Height - 358) / 2) + 250, 150, 75));
-            // Gwiazdki
-            //this.Stars = new Stars(
-            //    game.Content.Load<Texture2D>("Graphics/Game/star"),
-            //    this.GraphicsDevice.Viewport.Width,
-            //    this.GraphicsDevice.Viewport.Height);
+
             this.network.LoadContent(game.Content);
+            this.exitMenu.LoadContent(game);
 
             foreach(var planet in this.planets)  planet.LoadContent(game.Content);
         }
@@ -120,108 +120,128 @@ namespace GRProjekt.Game
 
             if (this.playing == true)
             {
-                if (Keyboard.GetState().IsKeyDown(Keys.N) && this.time >0.06f)
+                if(Keyboard.GetState().IsKeyDown(Keys.Escape))
                 {
-                    this.network.NetworkVisible = !this.network.NetworkVisible;
+                    this.exitMenu.MenuEnable = true;
                 }
-                if (this.time > 0.06f) time = 0;
 
-                #region Zachowania statku
-                try
+                if (this.exitMenu.MenuEnable == false)
                 {
-                    this.ship.Update();
-                }
-                catch (RunOutFuelException)
-                {
-                    this.currentItem = MenuList.runOutFuel;
-                }
-                catch (Exception)
-                { 
-                    // BUG
-                }
-                #endregion
 
-                foreach (var planet in this.planets) planet.Update();
-                this.time += 0.01f;
-
-                //this.Stars.Update(this.ship.Speed);
-                
-                // kolizje z planetami 
-                for (int i = 0; i < this.planets.Count; ++i)
-                {
-                    planets[i].UpdatePosition();
-
-                    if (this.ship.ObjectSphereBounding.Intersects(planets[i].ObjectSphereBounding))
+                    if (Keyboard.GetState().IsKeyDown(Keys.N) && this.time > 0.06f)
                     {
-                        planets[i].Dock();
-                        this._isDocked = true;
+                        this.network.NetworkVisible = !this.network.NetworkVisible;
                     }
+                    if (this.time > 0.06f) time = 0;
 
-                    if (planets[i].IsDocked())
+                    #region Zachowania statku
+                    try
                     {
-                        World.Current.shipPosition = planets[i].GetPlanetPositon();
-                        World.Current.cameraPosition = planets[i].GetPlanetPositon() - new Vector3(100, -600, 0);
-                        currentItem = MenuList.planetMenu;
-                        ship.PlanetCollision();
+                        this.ship.Update();
                     }
-
-                    #region Stary kod
-                    //if (this.ship.ObjectSphereBounding.Intersects(planets[i].ObjectSphereBounding) && planets[i].GetPlanetType == PlanetType.Star)
-                    //{
-                    //    World.Current.shipPosition = planets[i].GetPlanetPositon();
-                    //    ship.PlanetCollision();                        
-                    //}
-                    //else if (this.ship.ObjectSphereBounding.Intersects(planets[i].ObjectSphereBounding) && planets[i].GetPlanetType == PlanetType.RingPlanet)
-                    //{
-                    //    World.Current.shipPosition = planets[i].GetPlanetPositon();
-                    //    ship.PlanetCollision();
-                    //}
-                    //else if (this.ship.ObjectSphereBounding.Intersects(planets[i].ObjectSphereBounding) && planets[i].GetPlanetType == PlanetType.GasPlanet)
-                    //{
-                    //    World.Current.shipPosition = planets[i].GetPlanetPositon();
-                    //    ship.PlanetCollision();
-                    //}
-                    //else if (this.ship.ObjectSphereBounding.Intersects(planets[i].ObjectSphereBounding) && planets[i].GetPlanetType == PlanetType.LavaPlanet)
-                    //{
-                    //    World.Current.shipPosition = planets[i].GetPlanetPositon();
-                    //    ship.PlanetCollision();
-                    //}
-                    //else if (planets[i].ObjectSphereBounding.Intersects(this.ship.ObjectSphereBounding))
-                    //{
-                    //    World.Current.shipPosition = planets[i].GetPlanetPositon();
-                    //    ship.PlanetCollision();
-                    //}
+                    catch (RunOutFuelException)
+                    {
+                        this.currentItem = MenuList.runOutFuel;
+                    }
+                    catch (Exception)
+                    {
+                        // BUG
+                    }
                     #endregion
 
-                    if (Keyboard.GetState().IsKeyDown(Keys.Space))
+                    foreach (var planet in this.planets) planet.Update();
+                    this.time += 0.01f;
+
+                    // kolizje z planetami 
+                    for (int i = 0; i < this.planets.Count; ++i)
                     {
-                        for (int j = 0; j < this.planets.Count; ++j)
+                        planets[i].UpdatePosition();
+
+                        if (this.ship.ObjectSphereBounding.Intersects(planets[i].ObjectSphereBounding))
                         {
-                            if (planets[i].IsDocked())
+                            planets[i].Dock();
+                            this._isDocked = true;
+                        }
+
+                        if (planets[i].IsDocked())
+                        {
+                            World.Current.shipPosition = planets[i].GetPlanetPositon();
+                            World.Current.cameraPosition = planets[i].GetPlanetPositon() - new Vector3(100, -600, 0);
+                            currentItem = MenuList.planetMenu;
+                            ship.PlanetCollision();
+                        }
+
+                        #region Stary kod
+                        //if (this.ship.ObjectSphereBounding.Intersects(planets[i].ObjectSphereBounding) && planets[i].GetPlanetType == PlanetType.Star)
+                        //{
+                        //    World.Current.shipPosition = planets[i].GetPlanetPositon();
+                        //    ship.PlanetCollision();                        
+                        //}
+                        //else if (this.ship.ObjectSphereBounding.Intersects(planets[i].ObjectSphereBounding) && planets[i].GetPlanetType == PlanetType.RingPlanet)
+                        //{
+                        //    World.Current.shipPosition = planets[i].GetPlanetPositon();
+                        //    ship.PlanetCollision();
+                        //}
+                        //else if (this.ship.ObjectSphereBounding.Intersects(planets[i].ObjectSphereBounding) && planets[i].GetPlanetType == PlanetType.GasPlanet)
+                        //{
+                        //    World.Current.shipPosition = planets[i].GetPlanetPositon();
+                        //    ship.PlanetCollision();
+                        //}
+                        //else if (this.ship.ObjectSphereBounding.Intersects(planets[i].ObjectSphereBounding) && planets[i].GetPlanetType == PlanetType.LavaPlanet)
+                        //{
+                        //    World.Current.shipPosition = planets[i].GetPlanetPositon();
+                        //    ship.PlanetCollision();
+                        //}
+                        //else if (planets[i].ObjectSphereBounding.Intersects(this.ship.ObjectSphereBounding))
+                        //{
+                        //    World.Current.shipPosition = planets[i].GetPlanetPositon();
+                        //    ship.PlanetCollision();
+                        //}
+                        #endregion
+
+                        if (Keyboard.GetState().IsKeyDown(Keys.Space))
+                        {
+                            for (int j = 0; j < this.planets.Count; ++j)
                             {
-                                planets[j].UnDock();
-                                //World.Current.shipPosition += new Vector3(100, 500, 1100);
-                                currentItem = MenuList.game;
-                                World.Current.shipPosition += new Vector3(0,700,0);
-                                ship.ShipStart();
-                                this._isDocked = false;
+                                if (planets[i].IsDocked())
+                                {
+                                    planets[j].UnDock();
+                                    //World.Current.shipPosition += new Vector3(100, 500, 1100);
+                                    currentItem = MenuList.game;
+                                    World.Current.shipPosition += new Vector3(0, 700, 0);
+                                    ship.ShipStart();
+                                    this._isDocked = false;
+                                }
                             }
                         }
                     }
-                }
 
-                switch (this.currentItem)
-                { 
-                    case MenuList.runOutFuel:
-                        if (this.RunOutFuelWindow.Update())
-                        { 
-                            // naciśnięto na przycisk
-                            this._isDocked = true;
-                            planets[1].Dock();
-                        }
-                    break;
+                    switch (this.currentItem)
+                    {
+                        case MenuList.runOutFuel:
+                            if (this.RunOutFuelWindow.Update())
+                            {
+                                // naciśnięto na przycisk
+                                this._isDocked = true;
+                                planets[1].Dock();
+                            }
+                            break;
+                    }
                 }
+                else if (this.exitMenu.MenuEnable == true)
+                    if (this.exitMenu.Update() == true)
+                    {
+                        this.exitMenu.MenuEnable = false;
+                        ResetGame();
+                        Menu.CurrentItem = MainMenu.MenuList.mainMenu;
+                        this.playing = false; 
+                    }
             }
+        }
+
+        private void ResetGame()
+        {
+
         }
 
         public override void Draw(Microsoft.Xna.Framework.GameTime gameTime)
@@ -258,10 +278,19 @@ namespace GRProjekt.Game
                 {
                     // Rysowanie panelu
                     spriteBatch.Begin();
-                    //this.Stars.Draw(spriteBatch);
                     this.Panel.Draw(spriteBatch, new Rectangle(50, 475, 100, 100), ship.Speed, new Rectangle(650, 475, 100, 100), ship.Fuel);
                     spriteBatch.End();
                 }
+
+                if (this.exitMenu.MenuEnable)
+                {
+                    spriteBatch.Begin();
+
+                    this.exitMenu.Draw();
+
+                    spriteBatch.End();
+                }
+
             }
             base.Draw(gameTime);
         }

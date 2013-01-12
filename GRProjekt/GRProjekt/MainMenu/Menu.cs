@@ -15,7 +15,8 @@ namespace GRProjekt.MainMenu
         newGame,
         authors,
         instruction,
-        mainMenu
+        mainMenu,
+        exitMenu
     }
 
     public sealed class Menu : Microsoft.Xna.Framework.DrawableGameComponent
@@ -30,7 +31,7 @@ namespace GRProjekt.MainMenu
         private ManuItem backButton;
         private Model shipModel;
         private float modelRotation = 1.0f;
-        private MenuList currentItem;
+        private static MenuList currentItem;
         private Matrix[] transforms;
         private Microsoft.Xna.Framework.Game game;
         private SpriteBatch spriteBatch;
@@ -48,10 +49,10 @@ namespace GRProjekt.MainMenu
 
             for (int i = 0; i < 4; i++)
             {
-                menuItems.Add(new ManuItem(new Vector2(530, 130 + i * 60)));
+                menuItems.Add(new ManuItem(new Vector2(330, 230 + i * 60)));
             }
-            backButton = new ManuItem(new Vector2(50,400));
-            this.currentItem = MenuList.mainMenu;
+            backButton = new ManuItem(new Vector2(340,500));
+            currentItem = MenuList.mainMenu;
 
             newGame = new NewGame(game);
             game.Components.Add(this.newGame);
@@ -66,22 +67,28 @@ namespace GRProjekt.MainMenu
             base.Initialize();
         }
 
+        public static MenuList CurrentItem
+        {
+            get { return currentItem; }
+            set { currentItem = value; }
+        }
+
         protected override void LoadContent()
         {
             base.LoadContent();
 
             spriteBatch = new SpriteBatch(game.GraphicsDevice);
-            this.menuBorderTexture = game.Content.Load<Texture2D>("Graphics/MainMenu/menuBorder");
+            this.menuBorderTexture = game.Content.Load<Texture2D>("Graphics/MainMenu/menuBorder4");
             this.titleTexture = game.Content.Load<Texture2D>("Graphics/MainMenu/title");
-            this.authorsTexture = game.Content.Load<Texture2D>("Graphics/MainMenu/authorBackground");
+            this.authorsTexture = game.Content.Load<Texture2D>("Graphics/MainMenu/authors");
             
             this.backgroundTexture = game.Content.Load<Texture2D>("Graphics/MainMenu/menuBackground");
 
-            menuItems[0].LoadContent(game.Content, "Graphics/MainMenu/newgameButton");
-            menuItems[1].LoadContent(game.Content, "Graphics/MainMenu/instructionButton");
-            menuItems[2].LoadContent(game.Content, "Graphics/MainMenu/authorsButton");
-            menuItems[3].LoadContent(game.Content, "Graphics/MainMenu/exitButton");
-            backButton.LoadContent(game.Content, "Graphics/MainMenu/backButton");
+            menuItems[0].LoadContent(game.Content, "Graphics/MainMenu/newgameButton", "Graphics/MainMenu/newgameButtonA");
+            menuItems[1].LoadContent(game.Content, "Graphics/MainMenu/instructionButton", "Graphics/MainMenu/instructionButtonA");
+            menuItems[2].LoadContent(game.Content, "Graphics/MainMenu/authorsButton", "Graphics/MainMenu/authorsButtonA");
+            menuItems[3].LoadContent(game.Content, "Graphics/MainMenu/exitButton", "Graphics/MainMenu/exitButton2A");
+            backButton.LoadContent(game.Content, "Graphics/ExitMenu/returnButton", "Graphics/MainMenu/returnButton2A");
 
             shipModel = game.Content.Load<Model>("Models/Ship/guard3");
             transforms = new Matrix[shipModel.Bones.Count];
@@ -134,12 +141,12 @@ namespace GRProjekt.MainMenu
             Rectangle buff2 = backButton.GetRectangle;
             if (buff2.Contains(mouseState.X, mouseState.Y) == true && backButton.mouseOver == false)
             {
-                backButton.Transform(3);
+                backButton.Transform(0);
             }
             buff2.X -= 5;
             if (!buff2.Contains(mouseState.X, mouseState.Y) == true && backButton.mouseOver == true)
             {
-                backButton.Transform(4);
+                backButton.Transform(1);
             }
 
             if (currentItem == MenuList.newGame)
@@ -147,8 +154,10 @@ namespace GRProjekt.MainMenu
                 this.newGame.Playing = true;
             }
 
-            modelRotation += 0.02f;
+            modelRotation += 0.002f;
         }
+
+        float rotation =0;
 
         public override void Draw(Microsoft.Xna.Framework.GameTime gameTime)
         {
@@ -158,7 +167,9 @@ namespace GRProjekt.MainMenu
 
                 spriteBatch.Draw(backgroundTexture, this.game.GraphicsDevice.Viewport.Bounds, Color.White);
                 spriteBatch.Draw(titleTexture, new Vector2(20, 20), Color.White);
-                spriteBatch.Draw(menuBorderTexture, new Vector2(500, 100), Color.White);
+                //spriteBatch.Draw(menuBorderTexture, new Vector2(200, 140), Color.White);
+
+                spriteBatch.Draw(menuBorderTexture, new Vector2(400, 340), null, Color.White, rotation, new Vector2(200,206), 1, SpriteEffects.None, 1);
 
                 foreach (var item in menuItems)
                 {
@@ -167,33 +178,37 @@ namespace GRProjekt.MainMenu
 
                 spriteBatch.End();
 
-                DepthStencilState depthState = new DepthStencilState();
-                depthState.DepthBufferEnable = true;
-                depthState.DepthBufferWriteEnable = true;
-                GraphicsDevice.DepthStencilState = depthState;
+                //DepthStencilState depthState = new DepthStencilState();
+                //depthState.DepthBufferEnable = true;
+                //depthState.DepthBufferWriteEnable = true;
+                //GraphicsDevice.DepthStencilState = depthState;
 
-                shipModel.CopyAbsoluteBoneTransformsTo(transforms);
+                //shipModel.CopyAbsoluteBoneTransformsTo(transforms);
 
-                foreach (ModelMesh mesh in shipModel.Meshes)
-                {
-                    foreach (BasicEffect effect in mesh.Effects)
-                    {
-                        effect.EnableDefaultLighting();
-                        effect.World = transforms[mesh.ParentBone.Index] * Matrix.CreateRotationY(modelRotation) * Matrix.CreateScale(4.5f) *Matrix.CreateTranslation(new Vector3(-200, -100, 0));
-                        effect.View = Matrix.CreateLookAt(new Vector3(0.0f, 50.0f, 400.0f), new Vector3(0, 0, 0), Vector3.Up);
+                //foreach (ModelMesh mesh in shipModel.Meshes)
+                //{
+                //    foreach (BasicEffect effect in mesh.Effects)
+                //    {
+                //        effect.EnableDefaultLighting();
+                //        effect.World = transforms[mesh.ParentBone.Index] * Matrix.CreateRotationY(modelRotation) * Matrix.CreateScale(4.5f) *Matrix.CreateTranslation(new Vector3(-200, -50, 20));
+                //        effect.View = Matrix.CreateLookAt(new Vector3(0.0f, 50.0f, 400.0f), new Vector3(0, 0, 0), Vector3.Up);
 
-                        effect.Projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(90.0f),
-                            this.game.GraphicsDevice.Viewport.AspectRatio, 1.0f, 10000.0f);
-                    }
-                    mesh.Draw();
-                }
+                //        effect.Projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(90.0f),
+                //            this.game.GraphicsDevice.Viewport.AspectRatio, 1.0f, 10000.0f);
+                //    }
+                //    mesh.Draw();
+                //}
+
+                rotation+= 0.003f;
+                if(rotation == 360)rotation= 0;
             }
             else if (currentItem == MenuList.authors)
             {
                 spriteBatch.Begin();
                 spriteBatch.Draw(backgroundTexture, this.game.GraphicsDevice.Viewport.Bounds, Color.White);
+                
                 spriteBatch.Draw(titleTexture, new Vector2(20, 20), Color.White);
-                spriteBatch.Draw(authorsTexture, new Vector2(200, 110), Color.White);
+                spriteBatch.Draw(authorsTexture, new Vector2(170, 180), Color.White);
                 backButton.Draw(gameTime, spriteBatch);
                 spriteBatch.End();
             }

@@ -17,6 +17,25 @@ Content\Models\Planets\Star\suncyl1.xnb
 Content\Models\Planets\GasPlanet\Gas Gaint Texture copy.xnb
 Content\Graphics\Game\pointer.xnb
 Content\Graphics\Game\speed.xnb
+Content\Graphics\Game\fuel.xnb
+Content\Graphics\Game\fulePointer.xnb
+Content\Graphics\Game\okBut.xnb
+Content\Graphics\Game\runOutFuel.xnb
+Content\Graphics\ExitMenu\exitButton.xnb
+Content\Graphics\ExitMenu\mainMenuButton.xnb
+Content\Graphics\ExitMenu\returnButton.xnb
+Content\Graphics\ExitMenu\returnButtonA.xnb
+Content\Graphics\ExitMenu\exitButtonA.xnb
+Content\Graphics\ExitMenu\mainMenuButtonA.xnb
+Content\Graphics\MainMenu\newgameButtonA.xnb
+Content\Graphics\MainMenu\authorsButtonA.xnb
+Content\Graphics\MainMenu\instructionButtonA.xnb
+Content\Graphics\MainMenu\exitButton2A.xnb
+Content\Graphics\ExitMenu\menuBorder2.xnb
+Content\Graphics\ExitMenu\menuBorder3.xnb
+Content\Graphics\MainMenu\menuBorder4.xnb
+Content\Graphics\MainMenu\authors.xnb
+Content\Graphics\MainMenu\returnButton2A.xnb
 Content\Models\Ship\guard3.xnb
 Content\Ground.xnb
 Content\Models\Planets\RingPlanet\ring.xnb
@@ -31,9 +50,3 @@ Content\Models\Planets\RingPlanet2\Planet Rings_0.xnb
 Content\Models\Planets\Star\suncyl1_0.xnb
 Content\Models\Planets\GasPlanet\Gas Gaint Texture copy_0.xnb
 Content\Models\Ship\ShipDiffuse_0.xnb
-Content\Graphics\Game\fuel.xnb
-Content\Graphics\Game\fulePointer.xnb
-Content\Graphics\Game\runOutFuel.xnb
-Content\Graphics\Game\27.xnb
-Content\Graphics\Game\star.xnb
-Content\Graphics\Game\okBut.xnb

@@ -4,27 +4,27 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Content;
 
-namespace GRProjekt.MainMenu
+namespace GRProjekt.ExitMenu
 {
-    public class ManuItem
+    class ExitMenuItem
     {
         #region Members
 
         private Texture2D itemtexture;
-        private Vector2 destinationVector;
         private Texture2D itemtexture2;
+        private Vector2 destinationVector;
 
-        public ButtonState buttonState{get;set;}
+        public ButtonState buttonState { get; set; }
         public bool mouseOver { get; set; }
 
         #endregion
 
-        #region Constructors
+        #region Constructor
 
-        public ManuItem(Vector2 destinationVector)
+        public ExitMenuItem(Vector2 destinationVector)
         {
             this.destinationVector = destinationVector;
             this.buttonState = ButtonState.Released;
@@ -33,11 +33,12 @@ namespace GRProjekt.MainMenu
 
         #endregion
 
+
         #region propeteries
 
         public Rectangle GetRectangle
         {
-            get 
+            get
             {
                 return new Rectangle((int)destinationVector.X, (int)destinationVector.Y, itemtexture.Width, itemtexture.Height);
             }
@@ -63,23 +64,15 @@ namespace GRProjekt.MainMenu
                 case 1:
                     this.mouseOver = false;
                     break;
-                case 3:
-                    destinationVector.X+= 5;
-                    this.mouseOver = true;
-                    break;
-                case 4:
-                    destinationVector.X-= 5;
-                    this.mouseOver = false;
-                    break;
             }
         }
 
-        public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
+        public void Draw(SpriteBatch spriteBatch)
         {
-            if (mouseOver == true)
-                spriteBatch.Draw(itemtexture2, this.destinationVector, Color.White);
-            else
+            if(mouseOver == false)
                 spriteBatch.Draw(itemtexture, this.destinationVector, Color.White);
+            else
+                spriteBatch.Draw(itemtexture2, this.destinationVector, Color.White);
         }
 
         #endregion

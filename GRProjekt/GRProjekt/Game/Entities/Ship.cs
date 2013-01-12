@@ -20,6 +20,8 @@ namespace GRProjekt.Ship
         private float           shipV, shipH;
         private BoundingSphere  SphereBoundingBuff;
         private Vector3         previousShipPosition;
+        private float           shipTurn;
+        private int             shipPos;
 
         /// <summary>
         /// Aktualna prędkość
@@ -95,6 +97,8 @@ namespace GRProjekt.Ship
             this._speed = 0;
             shipV = 0;
             shipH = 0;
+            this.shipTurn = 0;
+            this.shipPos = 0;
         }
 
         public void ShipStart()
@@ -155,13 +159,24 @@ namespace GRProjekt.Ship
         public override void Update()
         {
             KeyboardState ks = Keyboard.GetState();
+            this.shipPos = 0;
+         
+
             // Zmiana kierunku możliwa tylko jeśli jest statek w ruchu 
             if (this._speed > 0)
             {
                 if (ks.IsKeyDown(Keys.Left))
-                    shipH += 0.2f;
+                {
+                    shipH += 1.2f;
+                    if(shipTurn < 1) shipTurn += 0.01f;
+                    shipPos = 1;
+                }
                 if (ks.IsKeyDown(Keys.Right))
-                    shipH -= 0.2f;
+                {
+                    shipH -= 1.2f;
+                    if (shipTurn > -1) shipTurn -= 0.01f;
+                    shipPos = -1;
+                }
                 if (ks.IsKeyDown(Keys.Up) && shipV > -40)
                     shipV -= 0.2f;
                 if (ks.IsKeyDown(Keys.Down) && shipV < 40)
@@ -186,6 +201,11 @@ namespace GRProjekt.Ship
                 if (this._fuel > 0)
                     this._fuel -= this._combustion;
             }
+
+            if (shipTurn > 0 && shipPos==0) shipTurn -= 0.1f;
+            if (shipTurn < 0 && shipPos==0) shipTurn += 0.1f;
+
+
             // Wyjątek spowodowany wyczerpaniem się paliwa
             if (this._speed <= 0 && this._fuel <= 0)
                 throw new RunOutFuelException();
@@ -197,6 +217,8 @@ namespace GRProjekt.Ship
 
             World.Current.shipPosition = new Vector3(World.Current.shipPosition.X, World.Current.shipPosition.Y, World.Current.shipPosition.Z);
             World.Current.shipPosition += shipOrientation.Forward * this._speed;
+
+            //World.Current.shipPosition = Vector3.Transform(World.Current.shipPosition, Matrix.CreateRotationY(MathHelper.ToRadians(0.40f)));
 
             this.objectSphereBounding = this.SphereBoundingBuff.Transform(shipOrientation * Matrix.CreateTranslation(World.Current.shipPosition));
 
